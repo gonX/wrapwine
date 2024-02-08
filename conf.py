@@ -1,3 +1,5 @@
+from types import SimpleNamespace
+from shutil import which
 ## User configurables:
 DEBUG = True # spam stderr with useless stuff
 TITLE = "Wrapwine Scanner (python)" # title used for dmenu
@@ -6,4 +8,7 @@ TITLE = "Wrapwine Scanner (python)" # title used for dmenu
 # COMMAND is used when outputting the command list
 # Arguments:
 #   {File} -- the path to the wrapwine unit
-COMMAND = "wrapwine '{File}' --nobash"
+# FIXME: fix comment
+COMMAND = SimpleNamespace()
+COMMAND.pre  = [ which("wrapwine") ]
+COMMAND.post = ["--nobash"]

@@ -1,3 +1,6 @@
+# unsupported, will break on changes
+# supposed to be used with rofigen, not sure how to actually apply this without using eval which is ugly
+
 import os, sys
 import conf, unit
 from util import *

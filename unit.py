@@ -121,7 +121,10 @@ class Unit:
         return self._filename
 
     def get_command(self):
-        return conf.COMMAND.format(File=self._filename)
+        return conf.COMMAND.pre + [ self._filename ] + conf.COMMAND.post
+
+    def launch(self):
+        return Runner.run()
 
     # return True/False whether WINEPREFIX is a link
     # TODO: follow link to see if it matches network paths (set in e.g. conf)
