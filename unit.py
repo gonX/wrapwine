@@ -1,5 +1,5 @@
 import os, sys, re
-import env_parser, conf
+import env_parser, conf, runner
 from util import *
 
 class Unit:
@@ -120,13 +120,28 @@ class Unit:
     def get_source_file(self):
         return self._filename
 
+    def get_run_command(self):
+        rv = []
+        if "PREPENDS" in self._vars:
+            rv += [ self._vars["PREPENDS"].split(' ') ]
+        rv += [ "wine" ]
+        rv += [ os.path.join(self.gamedir, self.exename) ]
+        if "ARGS" in self._vars:
+            rv += [ self._vars["ARGS"].split(' ') ]
+        return rv
+
+    # old, for wrapwine shell script
     def get_command(self):
         return conf.COMMAND.pre + [ self._filename ] + conf.COMMAND.post
 
     def launch(self):
-        return Runner.run()
+        return runner.Runner(self).run()
 
     # return True/False whether WINEPREFIX is a link
     # TODO: follow link to see if it matches network paths (set in e.g. conf)
     def is_remote(self):
         return os.path.islink(self.wineprefix)
+
+    def is_usable(self):
+        return self._filename_check() and \
+            self._iso_check()

@@ -66,6 +66,18 @@ class EnvVars:
                 self.env_vars.append(env_var)
         self.expand()
 
+    def __iter__(self):
+        self._iter = -1
+        self._iter_max = len(self.env_vars)
+        #debug(f"expecting {self._iter_max} values")
+        return self
+
+    def __next__(self):
+        self._iter += 1
+        if self._iter >= self._iter_max:
+            raise StopIteration
+        return self.env_vars[self._iter]
+
     def has_key(self, key):
         keys = self.get_keys()
         return key in keys
