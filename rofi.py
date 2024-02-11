@@ -32,7 +32,7 @@ def output_titles():
 
     for unit in units:
         title = unit.get_fancy_title()
-        if not unit.is_usable():
+        if ENHANCE_ROFI and not unit.is_usable():
             print(f"{get_title_as_unselectable(title)}")
         else:
             print(f"{title}")
