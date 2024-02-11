@@ -118,6 +118,7 @@ class Rofi:
                 print(f"{self.get_rofi_title(unit)}")
             else:
                 print(f"{unit.get_fancy_title()}")
+        return True
 
     # launches unit based on fancy title
     def launch_title(self, argv_fancy_title):
@@ -134,8 +135,10 @@ class Rofi:
     def print_rofi_option(self, key, value):
         if self.is_mode_opt_supported(key):
             print('\0' + key + chr(0x1f) + value)
+            return True
         else:
             debug(f"Skipping unsupported mode key '{key}'")
+            return False
 
     # print relevant rofi mode options
     def output_rofi_enhancements(self):
@@ -150,8 +153,7 @@ class Rofi:
         return True
 
     def print(self):
-        self.output_rofi_enhancements()
-        self.output_titles()
+        return self.output_rofi_enhancements() and self.output_titles()
 
 if __name__ == "__main__":
     rofi = Rofi(WRAPWINE_PATH)
