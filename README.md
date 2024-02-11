@@ -52,6 +52,8 @@ PREPENDS="gamescope"
 ARGS="--nosound"
 ```
 
+results in the following command being executed: `gamescope wine myfile.exe --nosound`
+
 ### Feral Interactive game mode support
 
 Set `GAMEMODE` to any value, e.g. `GAMEMODE=y`
