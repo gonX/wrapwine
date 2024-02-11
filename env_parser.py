@@ -2,6 +2,7 @@ import re, os
 from util import *
 
 class EnvVar:
+    """Class for parsing a BASH-style environment variable"""
     EXPAND_PATH_REGEX = re.compile(r"(?P<full>\${(?P<key>\w+)}|\$(?P<old_key>\w+))") # grabs "$ENV" or "${ENV}" from line
     VARIABLE_ASSIGNMENT_REGEX = re.compile(r"^(export )?(\w+?)=(.*)$") # FIXME: grabs comments from values e.g. beat-saber-mod-managers
 
@@ -9,6 +10,7 @@ class EnvVar:
         self.line = line
         self.parseline()
 
+    # expand all variables inside of value
     def expand(self, env_vars):
         if not self.key or not self.value:
             raise Exception("Missing key and/or value")
@@ -17,10 +19,12 @@ class EnvVar:
         if expand_value:
             self._complex_expand(env_vars)
 
+    # use python's builtin functions to expand path value
     def _simple_expand(self):
         self.value = os.path.expanduser(self.value)
         self.value = os.path.expandvars(self.value)
 
+    # expand variables from provided dictionary
     def _complex_expand(self, env_vars):
         gd = self.should_expand().groupdict()
         key = str()
@@ -34,19 +38,18 @@ class EnvVar:
             replacement = next(filter(lambda x: x.key == key, env_vars))
             self.value = self.value.replace(gd['full'], replacement.value)
 
+    # returns True if self.value still contains unexpanded variables
     def should_expand(self):
         if not self.value:
             raise "value is unset, unable to determine expand"
 
         return self.EXPAND_PATH_REGEX.match(self.value)
 
+    # set key and value based on line
     def parseline(self):
         # grab variable assignments
         matches = self.VARIABLE_ASSIGNMENT_REGEX.match(self.line)
         if matches and matches.lastindex >= 2: # is a variable assignment
-            # TODO: commented out because it is spammy
-            #if matches.group(1) and len(matches.group(1)) > 0:
-                # stderr("INFO: avoid using export in definitions?")
             self.key = matches.group(2)
             self.value = matches.group(3).strip('"')
 
@@ -69,7 +72,6 @@ class EnvVars:
     def __iter__(self):
         self._iter = -1
         self._iter_max = len(self.env_vars)
-        #debug(f"expecting {self._iter_max} values")
         return self
 
     def __next__(self):
@@ -88,6 +90,7 @@ class EnvVars:
     def get_keys(self):
         return [ var.key for var in self.env_vars ]
 
+    # expand all env vars
     def expand(self):
         MAX_LOOPS = 10 # very unlikely this actually occurs unless there's a bug
         loop = 0

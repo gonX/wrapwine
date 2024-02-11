@@ -58,6 +58,14 @@ class Rofi:
         self.units = list(get_units(self.wrapwine_path))
         self.units.sort(key=lambda x: x.get_fancy_title().lower())
 
+    def _get_rofi_version(self):
+        result = subprocess.run(self.VERSION_COMMAND, capture_output=True, text=True)
+        match = self.VERSION_REGEX.match(result.stdout)
+        if match:
+            return match.group(1)
+        else:
+            raise Exception("Could not determine rofi version")
+
     # where is "mode" or "row"
     def is_opt_supported(self, where, option):
         if where == "mode":
@@ -75,14 +83,6 @@ class Rofi:
 
     def is_mode_opt_supported(self, option):
         return self.is_opt_supported("mode", option)
-
-    def _get_rofi_version(self):
-        result = subprocess.run(self.VERSION_COMMAND, capture_output=True, text=True)
-        match = self.VERSION_REGEX.match(result.stdout)
-        if match:
-            return match.group(1)
-        else:
-            raise Exception("Could not determine rofi version")
 
     # return a string of supported desired options that can be appended to a rofi row
     def get_title_options(self, opts):
@@ -142,21 +142,22 @@ class Rofi:
         if not self.ENHANCE_ROFI:
             return False
 
-        units = self.units
-
         self.print_rofi_option("prompt", self.ROFI_PROMPT)
         self.print_rofi_option("no-custom", "true")
         if self.rofi_version < '1.7.6': # first version that supports row marking
-            bad_units = [ str(units.index(u)) for u in units if not u.is_usable() ]
+            bad_units = [ str(self.units.index(u)) for u in self.units if not u.is_usable() ]
             self.print_rofi_option("urgent", ','.join(bad_units))
         return True
+
+    def print(self):
+        self.output_rofi_enhancements()
+        self.output_titles()
 
 if __name__ == "__main__":
     rofi = Rofi(WRAPWINE_PATH)
     # no args
     if len(sys.argv) == 1:
-        rofi.output_rofi_enhancements()
-        rofi.output_titles()
+        rofi.print()
     # yes args
     elif len(sys.argv) >= 1:
         rofi.launch_title(sys.argv)
