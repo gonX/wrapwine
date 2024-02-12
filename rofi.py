@@ -113,11 +113,11 @@ class Rofi:
 
     # prints the fancy title of all units in order
     def output_titles(self):
-        for unit in self.units:
+        for u in self.units:
             if self.ENHANCE_ROFI:
-                print(f"{self.get_rofi_title(unit)}")
+                print(f"{self.get_rofi_title(u)}")
             else:
-                print(f"{unit.get_fancy_title()}")
+                print(f"{u.get_fancy_title()}")
         return True
 
     # launches unit based on fancy title
@@ -128,7 +128,7 @@ class Rofi:
             stderr(f"ERROR! Could not find a title matching '{fancy_title}'")
             sys.exit(1)
 
-        debug(f"Launching program title '{unit.get_basic_title()}'")
+        debug(f"Launching program title '{target.get_basic_title()}'")
         return target.launch()
 
     # print rofi mode option
