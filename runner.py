@@ -91,7 +91,7 @@ class Runner:
         command = self._unit.get_run_command()
         if "GAMEMODE" in self._env:
             stderr("Using gamemode")
-            command = GAMEMODE_COMMAND + command
+            command.insert(0, self.GAMEMODE_COMMAND)
 
         subprocess.run(command, env=self._env, cwd=self._wd)
 
