@@ -42,21 +42,21 @@ class Runner:
             self._env[var.key] = var.value
 
         # handle W
-        wine = unit_vars.get_by_key("W")
+        wine = unit_vars.get_by_key("W") #FIXME: bugged?
         if wine:
+            wine = str(wine)
             if not os.path.isdir(wine):
                 stderr(f"Runner: W path is not a dir: '{wine}'")
-                return False
+            else:
+                if "PATH" in self._initial_env:
+                    orig_path = self._initial_env["PATH"]
+                    new_path = f"{wine}/bin:{orig_path}"
+                    self._env["PATH"] = new_path
+                    debug(f"new path: {new_path}")
 
-            if "PATH" in self._initial_env:
-                orig_path = self._initial_env["PATH"]
-                new_path = f"{wine}/bin:{orig_path}"
-                self._env["PATH"] = new_path
-                debug(f"new path: {new_path}")
-
-            if not "STAGING_AUDIO_PERIOD" in unit_vars:
-                debug(f"custom wine versions gets STAGING_AUDIO_PERIOD set to {DEFAULT_WINE_AUDIO_PERIOD_SIZE}")
-                self._env["STAGING_AUDIO_PERIOD"] = self.DEFAULT_WINE_AUDIO_PERIOD_SIZE
+                if not "STAGING_AUDIO_PERIOD" in unit_vars:
+                    debug(f"custom wine versions gets STAGING_AUDIO_PERIOD set to {DEFAULT_WINE_AUDIO_PERIOD_SIZE}")
+                    self._env["STAGING_AUDIO_PERIOD"] = self.DEFAULT_WINE_AUDIO_PERIOD_SIZE
 
         for env_default in self.ENV_DEFAULTS:
             val = self.ENV_DEFAULTS[env_default]
