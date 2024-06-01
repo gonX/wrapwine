@@ -18,7 +18,7 @@ class Rofi:
 
     MINIMUM_SUPPORTED_ROFI_VERSION = "1.7.5"
 
-    VERSION_REGEX = re.compile('^Version: (\d\.\d\.\d)$')
+    VERSION_REGEX = re.compile(r'^Version: (\d\.\d\.\d)$')
     VERSION_COMMAND = [ "/usr/bin/rofi", "-version" ]
 
     # key is mode_OPTION or row_OPTION, value is minimum rofi version supported
