@@ -22,6 +22,23 @@ class Runner:
         self._wd = self._unit.gamedir
         self._initial_env = os.environ
 
+    # FIXME: move to util class
+    @staticmethod
+    def _find_wine(wine_path):
+        paths_to_try = [
+            "usr/bin",
+            "bin"
+        ]
+        for path in paths_to_try:
+            new_path = os.path.join(wine_path, path)
+            wine_file = os.path.join(new_path, "wine")
+            if os.path.isfile(wine_file):
+                debug(f"found wine in {new_path}")
+                return new_path
+
+        debug(f"could not find wine")
+        return None
+
     # returns True/False on whether start_shell will work
     def is_interactive(self):
         if not sys.stdout.isatty():
@@ -42,21 +59,24 @@ class Runner:
             self._env[var.key] = var.value
 
         # handle W
-        wine = unit_vars.get_by_key("W") #FIXME: bugged?
+        wine = unit_vars.get_by_key("W")
         if wine:
-            wine = str(wine)
+            wine.expand(unit_vars)
+            wine = wine.value
             if not os.path.isdir(wine):
                 stderr(f"Runner: W path is not a dir: '{wine}'")
-            else:
-                if "PATH" in self._initial_env:
-                    orig_path = self._initial_env["PATH"]
-                    new_path = f"{wine}/bin:{orig_path}"
-                    self._env["PATH"] = new_path
-                    debug(f"new path: {new_path}")
+                return False
 
-                if not "STAGING_AUDIO_PERIOD" in unit_vars:
-                    debug(f"custom wine versions gets STAGING_AUDIO_PERIOD set to {DEFAULT_WINE_AUDIO_PERIOD_SIZE}")
-                    self._env["STAGING_AUDIO_PERIOD"] = self.DEFAULT_WINE_AUDIO_PERIOD_SIZE
+            if "PATH" in self._initial_env:
+                orig_path = self._initial_env["PATH"]
+                new_wine_path = self._find_wine(wine)
+                new_path = f"{new_wine_path}:{orig_path}"
+                self._env["PATH"] = new_path
+                debug(f"new path: {new_path}")
+
+            if not "STAGING_AUDIO_PERIOD" in unit_vars:
+                debug(f"custom wine versions gets STAGING_AUDIO_PERIOD set to {self.DEFAULT_WINE_AUDIO_PERIOD_SIZE}")
+                self._env["STAGING_AUDIO_PERIOD"] = str(self.DEFAULT_WINE_AUDIO_PERIOD_SIZE)
 
         for env_default in self.ENV_DEFAULTS:
             val = self.ENV_DEFAULTS[env_default]
