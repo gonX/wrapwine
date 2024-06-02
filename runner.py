@@ -122,7 +122,9 @@ class Runner:
         return subprocess.run(command, env=self._env)
 
     def run(self):
-        self.init_env()
+        if not self.init_env():
+            stderr("Could not initialize env")
+            return False
         if self.is_interactive():
             self.start_shell()
         rv = self.start_unit()
