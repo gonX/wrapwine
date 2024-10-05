@@ -122,12 +122,12 @@ class Unit:
 
     def get_run_command(self):
         rv = []
-        if "PREPENDS" in self._vars:
-            rv += [ self._vars["PREPENDS"].split(' ') ]
+        if self._vars.has_key("PREPENDS"):
+            rv += self._vars.get_by_key("PREPENDS").value.split(' ')
         rv += [ "wine" ]
         rv += [ os.path.join(self.gamedir, self.exename) ]
-        if "ARGS" in self._vars:
-            rv += [ self._vars["ARGS"].split(' ') ]
+        if self._vars.has_key("ARGS"):
+            rv += self._vars.get_by_key("ARGS").value.split(' ')
         return rv
 
     # old, for wrapwine shell script
