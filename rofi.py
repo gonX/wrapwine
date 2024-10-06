@@ -114,6 +114,8 @@ class Rofi:
     # prints the fancy title of all units in order
     def output_titles(self):
         for u in self.units:
+            if u.skip and not conf.DEBUG:
+                continue
             if self.ENHANCE_ROFI:
                 print(f"{self.get_rofi_title(u)}")
             else:
