@@ -100,7 +100,7 @@ class Unit:
         title = self._titlebase
 
         if self.is_remote():
-            prepend = prepend + "{Remote}: "
+            prepend = "{Remote}: " + prepend
 
         if not self._filename_check():
             append = append + " (bad file?)"
