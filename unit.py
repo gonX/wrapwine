@@ -50,6 +50,10 @@ class Unit:
     def _check_folder(folder):
         return os.path.isdir(folder)
 
+    @staticmethod
+    def _check_file(file):
+        return os.path.isfile(file)
+
     def _gamedir_check(self):
         rv = self._check_folder(self.gamedir)
         if not rv:
@@ -67,10 +71,24 @@ class Unit:
     def _iso_check(self):
         # TODO: properly support ISODIR/ISOLOC
         var_keys = self._vars.get_keys()
-        if "ISODIR" in var_keys or "ISOLOC" in var_keys:
-            self.errors.append(f"ISOLOC/ISODIR unimplemented")
+        if not "ISODIR" in var_keys and \
+            not "ISOLOC" in var_keys and \
+            not "ISO_DRIVE_LETTER" in var_keys:
+            # nothing CD ISO related defined so don't need to check further
+            return True
+
+        if not "ISODIR" in var_keys or not "ISO_DRIVE_LETTER" in var_keys:
+            # one defined but not the other
             self.skip = True
+            self.errors.append(f"Both ISODIR and ISO_DRIVE_LETTER must be defined to use ISO operations")
             return False
+
+        if not self._check_file(self._vars.get_by_key("ISOLOC").value):
+            self.skip = True
+            self.errors.append(f"ISOLOC does not contain a valid file")
+            return False
+
+        # anything else should be handled by the runner
         return True
 
     def _init_class_vars(self):
@@ -128,6 +146,7 @@ class Unit:
         if self._vars.has_key("PREPENDS"):
             rv += self._vars.get_by_key("PREPENDS").value.split(' ')
         rv += [ "wine" ]
+        # FIXME: this is incorrect with ISO drive runs
         rv += [ os.path.join(self.gamedir, self.exename) ]
         if self._vars.has_key("ARGS"):
             rv += self._vars.get_by_key("ARGS").value.split(' ')

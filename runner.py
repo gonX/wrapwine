@@ -20,6 +20,12 @@ class Runner:
         self._env = None
         self._wd = self._unit.gamedir
         self._initial_env = os.environ
+        self._cleanup_commands = []
+        self._iso_mounted = False
+
+    def __del__(self):
+        while self._cleanup_commands:
+            self._cleanup_commands.pop()()
 
     # FIXME: move to util class
     @staticmethod
@@ -45,6 +51,37 @@ class Runner:
         if not sys.stdout or not sys.stdin or not sys.stderr:
             return False
         return True
+
+    def needs_iso_mount(self):
+        if not self._env:
+            raise Exception("Env must be initialized before running this")
+
+        return all(x in self._env for x in ["ISOLOC", "ISO_DRIVE_LETTER"])
+
+    def get_iso_mount_path(self):
+        if not self.needs_iso_mount():
+            return None
+
+        return os.path.join(self._unit.wineprefix, self._env["ISODIR"])
+
+    def unmount_iso(self):
+        if not self._iso_mounted:
+            raise ValueError("Tried to unmount iso without mount_iso() having been run")
+
+        subprocess.run(["fusermount", "-u", self.get_iso_mount_path()], check=True)
+        stderr("Successfully unmounted iso")
+        self._iso_mounted = False
+
+    def mount_iso(self):
+        if not "ISODIR" in self._env:
+            self._env["ISODIR"] = "isomount"
+        mountpath = self.get_iso_mount_path()
+        if not os.path.isdir(mountpath):
+            stderr(f"Creating dir {mountpath}")
+            os.mkdir(mountpath)
+        subprocess.run(["fuseiso", self._env["ISOLOC"], mountpath], check=True)
+        self._iso_mounted = True
+        self._cleanup_commands.append(self.unmount_iso)
 
     def init_env(self):
         if self._env:
@@ -82,6 +119,9 @@ class Runner:
             if env_default not in self._env:
                 debug(f"adding {env_default}={val} to env")
                 self._env[env_default] = val
+
+        if self.needs_iso_mount():
+            self.mount_iso()
 
         return True
 
