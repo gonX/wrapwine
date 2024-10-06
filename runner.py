@@ -6,7 +6,6 @@ from util import *
 # TODO:
 #   - ISOLOC/ISODIR support
 #     - Must fallback to 'isomount' folder if no ISODIR specified
-#   - gamemode support
 class Runner:
     DEFAULT_WINE_AUDIO_PERIOD_SIZE = 100000
     GAMEMODE_COMMAND = "gamemoderun"
