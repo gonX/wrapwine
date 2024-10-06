@@ -105,6 +105,9 @@ class Unit:
         if not self._filename_check():
             append = append + " (bad file?)"
 
+        if self._vars.has_key("IGNORE"):
+            prepend = "{{IGNORED}} " + prepend
+
         rv = title
         if prepend:
             rv = f"{prepend}{rv}"
