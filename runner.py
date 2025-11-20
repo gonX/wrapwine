@@ -112,7 +112,7 @@ class Runner:
         unit_vars = self._unit.get_vars()
         # import everything
         for var in unit_vars:
-            debug(f"var: {var.key}")
+            debug(f"var: {var.key}: {var.value}")
             self._env[var.key] = var.value
 
         # handle W
