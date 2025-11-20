@@ -103,7 +103,8 @@ class Rofi:
             title = unit.get_fancy_title()
         else:
             title = unit.get_basic_title()
-            opts["display"] = '"' + unit.get_fancy_title() + '"'
+            #opts["display"] = '"' + unit.get_fancy_title() + '"' # not needed any more in 1.7.7?
+            opts["display"] = unit.get_fancy_title()
 
         if not unit.is_usable():
             opts["nonselectable"] = "true"
