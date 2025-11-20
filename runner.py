@@ -32,6 +32,7 @@ class Runner:
     def _find_wine(wine_path):
         paths_to_try = [
             "usr/bin",
+            "bin-wow64",
             "bin"
         ]
         for path in paths_to_try:
