@@ -20,6 +20,7 @@ class Runner:
         self._cleanup_commands = []
         self._iso_mounted = False
 
+    # FIXME: doesn't work great in case of exceptions, maybe use a context manager around the run call instead?
     def __del__(self):
         while self._cleanup_commands:
             self._cleanup_commands.pop()()
