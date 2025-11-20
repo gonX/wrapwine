@@ -157,6 +157,8 @@ class Runner:
         shell = self._initial_env["SHELL"]
         if not os.path.exists(shell):
             raise Exception("invalid shell {shell}")
+        if not os.path.exists(self._wd):
+            raise FileNotFoundError(f"Cannot start shell with working dir not existing: {self._wd}")
         stderr("Subshell is now active!")
         command = self._unit.get_run_command()
         stderr(f"Run command: {' '.join(command)}")
