@@ -131,7 +131,7 @@ class Runner:
                 self._env["PATH"] = new_path
                 debug(f"new path: {new_path}")
 
-            if not "STAGING_AUDIO_PERIOD" in unit_vars:
+            if not "STAGING_AUDIO_PERIOD" in self._initial_env:
                 debug(f"custom wine versions gets STAGING_AUDIO_PERIOD set to {self.DEFAULT_WINE_AUDIO_PERIOD_SIZE}")
                 self._env["STAGING_AUDIO_PERIOD"] = str(self.DEFAULT_WINE_AUDIO_PERIOD_SIZE)
 
