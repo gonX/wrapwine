@@ -3,9 +3,6 @@ import os, subprocess
 import conf, unit
 from util import *
 
-# TODO:
-#   - ISOLOC/ISODIR support
-#     - Must fallback to 'isomount' folder if no ISODIR specified
 class Runner:
     DEFAULT_WINE_AUDIO_PERIOD_SIZE = 100000
     GAMEMODE_COMMAND = "gamemoderun"
@@ -65,13 +62,30 @@ class Runner:
 
         return os.path.join(self._unit.wineprefix, self._env["ISODIR"])
 
-    def unmount_iso(self):
-        if not self._iso_mounted:
+    def unmount_iso(self, force_run=False):
+        if not force_run and not self._iso_mounted:
             raise ValueError("Tried to unmount iso without mount_iso() having been run")
 
-        subprocess.run(["fusermount", "-u", self.get_iso_mount_path()], check=True)
+        subprocess.run(["fusermount", "-u", self.get_iso_mount_path()], check=~force_run)
         stderr("Successfully unmounted iso")
         self._iso_mounted = False
+
+    def _configure_driveletter(self, drive_letter):
+        if not "ISODIR" in self._env:
+            raise ValueError("need ISODIR to configure a drive letter")
+
+        basedir = self._unit.wineprefix
+        relative_path_driveletter = f"dosdevices/{drive_letter}:"
+        wine_path = os.path.join(basedir, relative_path_driveletter)
+        if os.path.islink(wine_path):
+            print(f"remove {wine_path}")
+            os.remove(wine_path)
+
+        if not os.path.isfile(wine_path):
+            isodir = self._env["ISODIR"]
+            os.symlink(f"../{isodir}", wine_path)
+        else:
+            raise ValueError("This does not seem like a proper WINE dosdevices dir")
 
     def mount_iso(self):
         if not "ISODIR" in self._env:
@@ -80,9 +94,14 @@ class Runner:
         if not os.path.isdir(mountpath):
             stderr(f"Creating dir {mountpath}")
             os.mkdir(mountpath)
+        elif os.path.ismount(mountpath):
+            stderr("Mountpath seems already mounted, trying to unmount it first..")
+            self.unmount_iso(force_run=True)
+
         subprocess.run(["fuseiso", self._env["ISOLOC"], mountpath], check=True)
         self._iso_mounted = True
         self._cleanup_commands.append(self.unmount_iso)
+        self._configure_driveletter(self._env["ISO_DRIVE_LETTER"])
 
     def init_env(self):
         if self._env:
